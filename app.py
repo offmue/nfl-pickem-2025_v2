@@ -159,6 +159,44 @@ class EliminatedTeam(db.Model):
             'team': self.team.to_dict()
         }
 
+class TeamWinnerUsage(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    team_id = db.Column(db.Integer, db.ForeignKey('team.id'), nullable=False)
+    usage_count = db.Column(db.Integer, default=0)
+    
+    user = db.relationship('User')
+    team = db.relationship('Team')
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'user': self.user.to_dict(),
+            'team': self.team.to_dict(),
+            'usage_count': self.usage_count
+        }
+
+class TeamLoserUsage(db.Model):
+    """Tracks teams that have been picked as losers (automatically when picking a winner)"""
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    team_id = db.Column(db.Integer, db.ForeignKey('team.id'), nullable=False)
+    week = db.Column(db.Integer, nullable=False)  # Track which week this happened
+    match_id = db.Column(db.Integer, db.ForeignKey('match.id'), nullable=False)  # Track the specific match
+    
+    user = db.relationship('User')
+    team = db.relationship('Team')
+    match = db.relationship('Match')
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'user': self.user.to_dict(),
+            'team': self.team.to_dict(),
+            'week': self.week,
+            'match': self.match.to_dict()
+        }
+
 # API Routes
 @app.route('/api/auth/login', methods=['POST'])
 def login():
@@ -303,14 +341,74 @@ def handle_picks():
             if team.id != match.home_team_id and team.id != match.away_team_id:
                 return jsonify({'error': 'Team is not part of this match'}), 400
                 
-            # Check if team is eliminated for this user
+            # NEW RULE: Check if user already has a pick for this WEEK (only one pick per week allowed)
+            existing_week_pick = Pick.query.join(Match).filter(
+                Pick.user_id == user_id,
+                Match.week == match.week
+            ).first()
+            
+            if existing_week_pick and existing_week_pick.match_id != match_id:
+                return jsonify({'error': f'You already have a pick for week {match.week}. Only one pick per week is allowed.'}), 400
+                
+            # Check if chosen team is eliminated for this user
             eliminated = EliminatedTeam.query.filter_by(user_id=user_id, team_id=team.id).first()
             if eliminated:
                 return jsonify({'error': 'Team is already eliminated for this user'}), 400
                 
-            # Check if user already has a pick for this match
+            # Check team winner usage limit (max 2 times per season)
+            team_usage = TeamWinnerUsage.query.filter_by(user_id=user_id, team_id=team.id).first()
+            if team_usage and team_usage.usage_count >= 2:
+                return jsonify({'error': 'Team has already been picked as winner 2 times this season'}), 400
+                
+            # NEW RULE: Check if the opposing team has been picked as loser before
+            opposing_team_id = match.away_team_id if team.id == match.home_team_id else match.home_team_id
+            loser_usage = TeamLoserUsage.query.filter_by(user_id=user_id, team_id=opposing_team_id).first()
+            if loser_usage:
+                opposing_team = Team.query.get(opposing_team_id)
+                return jsonify({'error': f'{opposing_team.name} has already been picked as loser this season and cannot be picked as loser again'}), 400
+            if team.id != match.home_team_id and team.id != match.away_team_id:
+                return jsonify({'error': 'Team is not part of this match'}), 400
+                
+            # Check if user already has a pick for this match (for updates)
             existing_pick = Pick.query.filter_by(user_id=user_id, match_id=match_id).first()
+            
             if existing_pick:
+                # Update existing pick
+                old_team_id = existing_pick.chosen_team_id
+                old_opposing_team_id = match.away_team_id if old_team_id == match.home_team_id else match.home_team_id
+                
+                # If changing pick, we need to update usage counts
+                if old_team_id != chosen_team_id:
+                    # Remove old winner usage
+                    old_team_usage = TeamWinnerUsage.query.filter_by(user_id=user_id, team_id=old_team_id).first()
+                    if old_team_usage and old_team_usage.usage_count > 0:
+                        old_team_usage.usage_count -= 1
+                        if old_team_usage.usage_count == 0:
+                            db.session.delete(old_team_usage)
+                    
+                    # Remove old loser usage
+                    old_loser_usage = TeamLoserUsage.query.filter_by(user_id=user_id, team_id=old_opposing_team_id, match_id=match_id).first()
+                    if old_loser_usage:
+                        db.session.delete(old_loser_usage)
+                    
+                    # Add new winner usage
+                    new_team_usage = TeamWinnerUsage.query.filter_by(user_id=user_id, team_id=chosen_team_id).first()
+                    if new_team_usage:
+                        new_team_usage.usage_count += 1
+                    else:
+                        new_team_usage = TeamWinnerUsage(user_id=user_id, team_id=chosen_team_id, usage_count=1)
+                        db.session.add(new_team_usage)
+                    
+                    # Add new loser usage (automatically when picking winner)
+                    new_opposing_team_id = match.away_team_id if chosen_team_id == match.home_team_id else match.home_team_id
+                    new_loser_usage = TeamLoserUsage(
+                        user_id=user_id, 
+                        team_id=new_opposing_team_id, 
+                        week=match.week,
+                        match_id=match_id
+                    )
+                    db.session.add(new_loser_usage)
+                
                 # Update existing pick
                 existing_pick.chosen_team_id = chosen_team_id
                 db.session.commit()
@@ -322,6 +420,24 @@ def handle_picks():
                 # Create new pick
                 pick = Pick(user_id=user_id, match_id=match_id, chosen_team_id=chosen_team_id)
                 db.session.add(pick)
+                
+                # Update team winner usage count
+                if team_usage:
+                    team_usage.usage_count += 1
+                else:
+                    team_usage = TeamWinnerUsage(user_id=user_id, team_id=chosen_team_id, usage_count=1)
+                    db.session.add(team_usage)
+                
+                # NEW RULE: Automatically add loser usage for opposing team
+                opposing_team_id = match.away_team_id if chosen_team_id == match.home_team_id else match.home_team_id
+                loser_usage = TeamLoserUsage(
+                    user_id=user_id, 
+                    team_id=opposing_team_id, 
+                    week=match.week,
+                    match_id=match_id
+                )
+                db.session.add(loser_usage)
+                
                 db.session.commit()
                 return jsonify({
                     'message': 'Pick created successfully',
@@ -429,6 +545,81 @@ def get_eliminated_teams():
         }), 200
     except Exception as e:
         print(f"Error in get_eliminated_teams: {e}")
+        return jsonify({'error': 'Internal server error', 'details': str(e)}), 500
+
+@app.route('/api/picks/team-usage', methods=['GET'])
+def get_team_winner_usage():
+    try:
+        user_id = request.args.get('user_id', type=int)
+        
+        if not user_id:
+            return jsonify({'error': 'User ID required'}), 400
+            
+        # Get the user
+        user = User.query.get(user_id)
+        if not user:
+            return jsonify({'error': 'User not found'}), 404
+            
+        # Get team winner usage
+        team_usage = TeamWinnerUsage.query.filter_by(user_id=user_id).all()
+        
+        # Create a dictionary for easy lookup
+        usage_dict = {}
+        for usage in team_usage:
+            usage_dict[usage.team_id] = usage.usage_count
+            
+        # Get all teams and add usage count
+        all_teams = Team.query.all()
+        team_status = []
+        
+        for team in all_teams:
+            usage_count = usage_dict.get(team.id, 0)
+            status = 'available'
+            
+            if usage_count >= 2:
+                status = 'max_used'
+            elif usage_count == 1:
+                status = 'used_once'
+                
+            team_status.append({
+                'team': team.to_dict(),
+                'usage_count': usage_count,
+                'status': status
+            })
+        
+        return jsonify({
+            'team_usage': team_status
+        }), 200
+    except Exception as e:
+        print(f"Error in get_team_winner_usage: {e}")
+        return jsonify({'error': 'Internal server error', 'details': str(e)}), 500
+
+@app.route('/api/picks/loser-usage', methods=['GET'])
+def get_team_loser_usage():
+    """Get teams that have been used as losers by a user"""
+    try:
+        user_id = request.args.get('user_id', type=int)
+        
+        if not user_id:
+            return jsonify({'error': 'User ID required'}), 400
+            
+        # Get the user
+        user = User.query.get(user_id)
+        if not user:
+            return jsonify({'error': 'User not found'}), 404
+            
+        # Get teams used as losers
+        loser_usage = TeamLoserUsage.query.filter_by(user_id=user_id).all()
+        
+        loser_teams = []
+        for usage in loser_usage:
+            loser_teams.append(usage.team.to_dict())
+        
+        return jsonify({
+            'loser_teams': loser_teams
+        }), 200
+    except Exception as e:
+        print(f"Error in get_team_loser_usage: {e}")
         return jsonify({'error': 'Internal server error', 'details': str(e)}), 500
 
 @app.route('/api/leaderboard', methods=['GET'])
@@ -794,6 +985,175 @@ with app.app_context():
             
             match = Match(
                 week=2,
+                home_team_id=home_team.id,
+                away_team_id=away_team.id,
+                start_time=datetime.fromisoformat(match_data['start_time']),
+                is_completed=False
+            )
+            db.session.add(match)
+        
+        # Add matches for week 3 (upcoming)
+        week3_matches = [
+            {
+                'home_team': 'Buffalo Bills',
+                'away_team': 'Miami Dolphins',
+                'start_time': '2025-09-21T13:00:00'
+            },
+            {
+                'home_team': 'Chicago Bears',
+                'away_team': 'Indianapolis Colts',
+                'start_time': '2025-09-21T13:00:00'
+            },
+            {
+                'home_team': 'Cleveland Browns',
+                'away_team': 'New York Giants',
+                'start_time': '2025-09-21T13:00:00'
+            },
+            {
+                'home_team': 'Denver Broncos',
+                'away_team': 'Tampa Bay Buccaneers',
+                'start_time': '2025-09-21T13:00:00'
+            },
+            {
+                'home_team': 'Green Bay Packers',
+                'away_team': 'Tennessee Titans',
+                'start_time': '2025-09-21T13:00:00'
+            },
+            {
+                'home_team': 'Houston Texans',
+                'away_team': 'Minnesota Vikings',
+                'start_time': '2025-09-21T13:00:00'
+            },
+            {
+                'home_team': 'Las Vegas Raiders',
+                'away_team': 'Carolina Panthers',
+                'start_time': '2025-09-21T13:00:00'
+            },
+            {
+                'home_team': 'New England Patriots',
+                'away_team': 'New York Jets',
+                'start_time': '2025-09-21T13:00:00'
+            },
+            {
+                'home_team': 'Philadelphia Eagles',
+                'away_team': 'New Orleans Saints',
+                'start_time': '2025-09-21T13:00:00'
+            },
+            {
+                'home_team': 'San Francisco 49ers',
+                'away_team': 'Los Angeles Rams',
+                'start_time': '2025-09-21T16:05:00'
+            },
+            {
+                'home_team': 'Seattle Seahawks',
+                'away_team': 'Dallas Cowboys',
+                'start_time': '2025-09-21T16:25:00'
+            },
+            {
+                'home_team': 'Kansas City Chiefs',
+                'away_team': 'Atlanta Falcons',
+                'start_time': '2025-09-21T20:20:00'
+            },
+            {
+                'home_team': 'Detroit Lions',
+                'away_team': 'Arizona Cardinals',
+                'start_time': '2025-09-22T19:00:00'
+            }
+        ]
+        
+        for match_data in week3_matches:
+            home_team = teams[match_data['home_team']]
+            away_team = teams[match_data['away_team']]
+            
+            match = Match(
+                week=3,
+                home_team_id=home_team.id,
+                away_team_id=away_team.id,
+                start_time=datetime.fromisoformat(match_data['start_time']),
+                is_completed=False
+            )
+            db.session.add(match)
+        
+        # Add matches for week 4 (upcoming)
+        week4_matches = [
+            {
+                'home_team': 'Atlanta Falcons',
+                'away_team': 'New Orleans Saints',
+                'start_time': '2025-09-28T13:00:00'
+            },
+            {
+                'home_team': 'Carolina Panthers',
+                'away_team': 'Cincinnati Bengals',
+                'start_time': '2025-09-28T13:00:00'
+            },
+            {
+                'home_team': 'Indianapolis Colts',
+                'away_team': 'Pittsburgh Steelers',
+                'start_time': '2025-09-28T13:00:00'
+            },
+            {
+                'home_team': 'Jacksonville Jaguars',
+                'away_team': 'Houston Texans',
+                'start_time': '2025-09-28T13:00:00'
+            },
+            {
+                'home_team': 'Los Angeles Rams',
+                'away_team': 'Chicago Bears',
+                'start_time': '2025-09-28T13:00:00'
+            },
+            {
+                'home_team': 'Minnesota Vikings',
+                'away_team': 'Green Bay Packers',
+                'start_time': '2025-09-28T13:00:00'
+            },
+            {
+                'home_team': 'New York Giants',
+                'away_team': 'Dallas Cowboys',
+                'start_time': '2025-09-28T13:00:00'
+            },
+            {
+                'home_team': 'New York Jets',
+                'away_team': 'Denver Broncos',
+                'start_time': '2025-09-28T13:00:00'
+            },
+            {
+                'home_team': 'Tampa Bay Buccaneers',
+                'away_team': 'Philadelphia Eagles',
+                'start_time': '2025-09-28T13:00:00'
+            },
+            {
+                'home_team': 'Tennessee Titans',
+                'away_team': 'Miami Dolphins',
+                'start_time': '2025-09-28T13:00:00'
+            },
+            {
+                'home_team': 'Washington Commanders',
+                'away_team': 'Arizona Cardinals',
+                'start_time': '2025-09-28T16:05:00'
+            },
+            {
+                'home_team': 'Los Angeles Chargers',
+                'away_team': 'Kansas City Chiefs',
+                'start_time': '2025-09-28T16:25:00'
+            },
+            {
+                'home_team': 'Buffalo Bills',
+                'away_team': 'Baltimore Ravens',
+                'start_time': '2025-09-28T20:20:00'
+            },
+            {
+                'home_team': 'Detroit Lions',
+                'away_team': 'Seattle Seahawks',
+                'start_time': '2025-09-29T19:00:00'
+            }
+        ]
+        
+        for match_data in week4_matches:
+            home_team = teams[match_data['home_team']]
+            away_team = teams[match_data['away_team']]
+            
+            match = Match(
+                week=4,
                 home_team_id=home_team.id,
                 away_team_id=away_team.id,
                 start_time=datetime.fromisoformat(match_data['start_time']),
