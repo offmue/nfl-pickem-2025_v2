@@ -94,43 +94,6 @@ class Match(db.Model):
     def winner(self):
         return self.winner_team.name if self.winner_team else None
     
-    @property
-    def is_game_started(self):
-        """Check if the game has started (in Vienna timezone)"""
-        from datetime import datetime
-        import pytz
-        
-        vienna_tz = pytz.timezone('Europe/Vienna')
-        now_vienna = datetime.now(vienna_tz)
-        
-        # Convert start_time to Vienna timezone if it's not already
-        if self.start_time.tzinfo is None:
-            # Assume UTC if no timezone info
-            utc_tz = pytz.UTC
-            start_time_utc = utc_tz.localize(self.start_time)
-        else:
-            start_time_utc = self.start_time
-            
-        start_time_vienna = start_time_utc.astimezone(vienna_tz)
-        
-        return now_vienna >= start_time_vienna
-    
-    @property
-    def start_time_vienna(self):
-        """Get start time in Vienna timezone"""
-        import pytz
-        
-        vienna_tz = pytz.timezone('Europe/Vienna')
-        
-        if self.start_time.tzinfo is None:
-            # Assume UTC if no timezone info
-            utc_tz = pytz.UTC
-            start_time_utc = utc_tz.localize(self.start_time)
-        else:
-            start_time_utc = self.start_time
-            
-        return start_time_utc.astimezone(vienna_tz)
-    
     @winner.setter
     def winner(self, team_name):
         if team_name:
@@ -147,9 +110,7 @@ class Match(db.Model):
             'home_team': self.home_team.to_dict(),
             'away_team': self.away_team.to_dict(),
             'start_time': self.start_time.isoformat(),
-            'start_time_vienna': self.start_time_vienna.isoformat(),
             'is_completed': self.is_completed,
-            'is_game_started': self.is_game_started,
             'home_score': self.home_score,
             'away_score': self.away_score,
             'status': self.status,
@@ -366,10 +327,6 @@ def handle_picks():
             match = Match.query.get(match_id)
             if not match:
                 return jsonify({'error': 'Match not found'}), 404
-            
-            # Check if game has already started (Backend validation)
-            if match.is_game_started:
-                return jsonify({'error': 'Game has already started. Picks are no longer allowed.'}), 400
                 
             # Check if team exists
             team = Team.query.get(chosen_team_id)
@@ -828,6 +785,439 @@ def serve_static(path):
 # Initialize database
 with app.app_context():
     db.create_all()
+    # Automatic initialization removed - use init_db_new.py instead
+        # Add users
+        users = [
+            {'username': 'Manuel', 'password': 'Manuel1', 'email': 'manuel@example.com', 'is_admin': True},
+            {'username': 'Daniel', 'password': 'Daniel1', 'email': 'daniel@example.com', 'is_admin': False},
+            {'username': 'Raff', 'password': 'Raff1', 'email': 'raff@example.com', 'is_admin': False},
+            {'username': 'Haunschi', 'password': 'Haunschi1', 'email': 'haunschi@example.com', 'is_admin': False}
+        ]
+        
+        for user_data in users:
+            user = User(username=user_data['username'], email=user_data['email'], is_admin=user_data['is_admin'])
+            user.set_password(user_data['password'])
+            db.session.add(user)
+        
+        # Add teams
+        teams_data = [
+            {'name': 'Arizona Cardinals', 'abbreviation': 'ARI', 'logo_url': '/static/logos/arizona-cardinals.png'},
+            {'name': 'Atlanta Falcons', 'abbreviation': 'ATL', 'logo_url': '/static/logos/atlanta-falcons.png'},
+            {'name': 'Baltimore Ravens', 'abbreviation': 'BAL', 'logo_url': '/static/logos/baltimore-ravens.png'},
+            {'name': 'Buffalo Bills', 'abbreviation': 'BUF', 'logo_url': '/static/logos/buffalo-bills.png'},
+            {'name': 'Carolina Panthers', 'abbreviation': 'CAR', 'logo_url': '/static/logos/carolina-panthers.png'},
+            {'name': 'Chicago Bears', 'abbreviation': 'CHI', 'logo_url': '/static/logos/chicago-bears.png'},
+            {'name': 'Cincinnati Bengals', 'abbreviation': 'CIN', 'logo_url': '/static/logos/cincinnati-bengals.png'},
+            {'name': 'Cleveland Browns', 'abbreviation': 'CLE', 'logo_url': '/static/logos/cleveland-browns.png'},
+            {'name': 'Dallas Cowboys', 'abbreviation': 'DAL', 'logo_url': '/static/logos/dallas-cowboys.png'},
+            {'name': 'Denver Broncos', 'abbreviation': 'DEN', 'logo_url': '/static/logos/denver-broncos.png'},
+            {'name': 'Detroit Lions', 'abbreviation': 'DET', 'logo_url': '/static/logos/detroit-lions.png'},
+            {'name': 'Green Bay Packers', 'abbreviation': 'GB', 'logo_url': '/static/logos/green-bay-packers.png'},
+            {'name': 'Houston Texans', 'abbreviation': 'HOU', 'logo_url': '/static/logos/houston-texans.png'},
+            {'name': 'Indianapolis Colts', 'abbreviation': 'IND', 'logo_url': '/static/logos/indianapolis-colts.png'},
+            {'name': 'Jacksonville Jaguars', 'abbreviation': 'JAX', 'logo_url': '/static/logos/jacksonville-jaguars.png'},
+            {'name': 'Kansas City Chiefs', 'abbreviation': 'KC', 'logo_url': '/static/logos/kansas-city-chiefs.png'},
+            {'name': 'Las Vegas Raiders', 'abbreviation': 'LV', 'logo_url': '/static/logos/las-vegas-raiders.png'},
+            {'name': 'Los Angeles Chargers', 'abbreviation': 'LAC', 'logo_url': '/static/logos/los-angeles-chargers.png'},
+            {'name': 'Los Angeles Rams', 'abbreviation': 'LAR', 'logo_url': '/static/logos/los-angeles-rams.png'},
+            {'name': 'Miami Dolphins', 'abbreviation': 'MIA', 'logo_url': '/static/logos/miami-dolphins.png'},
+            {'name': 'Minnesota Vikings', 'abbreviation': 'MIN', 'logo_url': '/static/logos/minnesota-vikings.png'},
+            {'name': 'New England Patriots', 'abbreviation': 'NE', 'logo_url': '/static/logos/new-england-patriots.png'},
+            {'name': 'New Orleans Saints', 'abbreviation': 'NO', 'logo_url': '/static/logos/new-orleans-saints.png'},
+            {'name': 'New York Giants', 'abbreviation': 'NYG', 'logo_url': '/static/logos/new-york-giants.png'},
+            {'name': 'New York Jets', 'abbreviation': 'NYJ', 'logo_url': '/static/logos/new-york-jets.png'},
+            {'name': 'Philadelphia Eagles', 'abbreviation': 'PHI', 'logo_url': '/static/logos/philadelphia-eagles.png'},
+            {'name': 'Pittsburgh Steelers', 'abbreviation': 'PIT', 'logo_url': '/static/logos/pittsburgh-steelers.png'},
+            {'name': 'San Francisco 49ers', 'abbreviation': 'SF', 'logo_url': '/static/logos/san-francisco-49ers.png'},
+            {'name': 'Seattle Seahawks', 'abbreviation': 'SEA', 'logo_url': '/static/logos/seattle-seahawks.png'},
+            {'name': 'Tampa Bay Buccaneers', 'abbreviation': 'TB', 'logo_url': '/static/logos/tampa-bay-buccaneers.png'},
+            {'name': 'Tennessee Titans', 'abbreviation': 'TEN', 'logo_url': '/static/logos/tennessee-titans.png'},
+            {'name': 'Washington Commanders', 'abbreviation': 'WAS', 'logo_url': '/static/logos/washington-commanders.png'}
+        ]
+        
+        for team_data in teams_data:
+            team = Team(name=team_data['name'], abbreviation=team_data['abbreviation'], logo_url=team_data['logo_url'])
+            db.session.add(team)
+        
+        db.session.commit()
+        
+        # Add matches for week 1 (already completed)
+        teams = {team.name: team for team in Team.query.all()}
+        
+        week1_matches = [
+            {
+                'home_team': 'Tampa Bay Buccaneers',
+                'away_team': 'Atlanta Falcons',
+                'start_time': '2025-09-07T13:00:00',
+                'winner_team': 'Tampa Bay Buccaneers'
+            },
+            {
+                'home_team': 'Tennessee Titans',
+                'away_team': 'Denver Broncos',
+                'start_time': '2025-09-07T13:00:00',
+                'winner_team': 'Denver Broncos'
+            },
+            {
+                'home_team': 'Cleveland Browns',
+                'away_team': 'Cincinnati Bengals',
+                'start_time': '2025-09-07T13:00:00',
+                'winner_team': 'Cincinnati Bengals'
+            },
+            {
+                'home_team': 'New York Giants',
+                'away_team': 'Washington Commanders',
+                'start_time': '2025-09-07T13:00:00',
+                'winner_team': 'Washington Commanders'
+            }
+        ]
+        
+        for match_data in week1_matches:
+            home_team = teams[match_data['home_team']]
+            away_team = teams[match_data['away_team']]
+            winner_team = teams[match_data['winner_team']]
+            
+            match = Match(
+                week=1,
+                home_team_id=home_team.id,
+                away_team_id=away_team.id,
+                start_time=datetime.fromisoformat(match_data['start_time']),
+                is_completed=True,
+                winner_team_id=winner_team.id
+            )
+            db.session.add(match)
+        
+        # Add matches for week 2 (upcoming)
+        week2_matches = [
+            # Thursday, Sept. 11
+            {
+                'home_team': 'Green Bay Packers',
+                'away_team': 'Washington Commanders',
+                'start_time': '2025-09-11T20:15:00'
+            },
+            # Sunday, Sept. 14 - 1:00 PM ET games
+            {
+                'home_team': 'Cincinnati Bengals',
+                'away_team': 'Jacksonville Jaguars',
+                'start_time': '2025-09-14T13:00:00'
+            },
+            {
+                'home_team': 'Dallas Cowboys',
+                'away_team': 'New York Giants',
+                'start_time': '2025-09-14T13:00:00'
+            },
+            {
+                'home_team': 'Detroit Lions',
+                'away_team': 'Chicago Bears',
+                'start_time': '2025-09-14T13:00:00'
+            },
+            {
+                'home_team': 'Tennessee Titans',
+                'away_team': 'Los Angeles Rams',
+                'start_time': '2025-09-14T13:00:00'
+            },
+            {
+                'home_team': 'Miami Dolphins',
+                'away_team': 'New England Patriots',
+                'start_time': '2025-09-14T13:00:00'
+            },
+            {
+                'home_team': 'New Orleans Saints',
+                'away_team': 'San Francisco 49ers',
+                'start_time': '2025-09-14T13:00:00'
+            },
+            {
+                'home_team': 'New York Jets',
+                'away_team': 'Buffalo Bills',
+                'start_time': '2025-09-14T13:00:00'
+            },
+            {
+                'home_team': 'Pittsburgh Steelers',
+                'away_team': 'Seattle Seahawks',
+                'start_time': '2025-09-14T13:00:00'
+            },
+            {
+                'home_team': 'Baltimore Ravens',
+                'away_team': 'Cleveland Browns',
+                'start_time': '2025-09-14T13:00:00'
+            },
+            # Sunday, Sept. 14 - 4:05 PM ET games
+            {
+                'home_team': 'Indianapolis Colts',
+                'away_team': 'Denver Broncos',
+                'start_time': '2025-09-14T16:05:00'
+            },
+            {
+                'home_team': 'Arizona Cardinals',
+                'away_team': 'Carolina Panthers',
+                'start_time': '2025-09-14T16:05:00'
+            },
+            # Sunday, Sept. 14 - 4:25 PM ET game
+            {
+                'home_team': 'Kansas City Chiefs',
+                'away_team': 'Philadelphia Eagles',
+                'start_time': '2025-09-14T16:25:00'
+            },
+            # Sunday, Sept. 14 - 8:20 PM ET game
+            {
+                'home_team': 'Minnesota Vikings',
+                'away_team': 'Atlanta Falcons',
+                'start_time': '2025-09-14T20:20:00'
+            },
+            # Monday, Sept. 15 - 7:00 PM ET game
+            {
+                'home_team': 'Houston Texans',
+                'away_team': 'Tampa Bay Buccaneers',
+                'start_time': '2025-09-15T19:00:00'
+            },
+            # Monday, Sept. 15 - 10:00 PM ET game
+            {
+                'home_team': 'Los Angeles Chargers',
+                'away_team': 'Las Vegas Raiders',
+                'start_time': '2025-09-15T22:00:00'
+            }
+        ]
+        
+        for match_data in week2_matches:
+            home_team = teams[match_data['home_team']]
+            away_team = teams[match_data['away_team']]
+            
+            match = Match(
+                week=2,
+                home_team_id=home_team.id,
+                away_team_id=away_team.id,
+                start_time=datetime.fromisoformat(match_data['start_time']),
+                is_completed=False
+            )
+            db.session.add(match)
+        
+        # Add matches for week 3 (upcoming)
+        week3_matches = [
+            {
+                'home_team': 'Buffalo Bills',
+                'away_team': 'Miami Dolphins',
+                'start_time': '2025-09-21T13:00:00'
+            },
+            {
+                'home_team': 'Chicago Bears',
+                'away_team': 'Indianapolis Colts',
+                'start_time': '2025-09-21T13:00:00'
+            },
+            {
+                'home_team': 'Cleveland Browns',
+                'away_team': 'New York Giants',
+                'start_time': '2025-09-21T13:00:00'
+            },
+            {
+                'home_team': 'Denver Broncos',
+                'away_team': 'Tampa Bay Buccaneers',
+                'start_time': '2025-09-21T13:00:00'
+            },
+            {
+                'home_team': 'Green Bay Packers',
+                'away_team': 'Tennessee Titans',
+                'start_time': '2025-09-21T13:00:00'
+            },
+            {
+                'home_team': 'Houston Texans',
+                'away_team': 'Minnesota Vikings',
+                'start_time': '2025-09-21T13:00:00'
+            },
+            {
+                'home_team': 'Las Vegas Raiders',
+                'away_team': 'Carolina Panthers',
+                'start_time': '2025-09-21T13:00:00'
+            },
+            {
+                'home_team': 'New England Patriots',
+                'away_team': 'New York Jets',
+                'start_time': '2025-09-21T13:00:00'
+            },
+            {
+                'home_team': 'Philadelphia Eagles',
+                'away_team': 'New Orleans Saints',
+                'start_time': '2025-09-21T13:00:00'
+            },
+            {
+                'home_team': 'San Francisco 49ers',
+                'away_team': 'Los Angeles Rams',
+                'start_time': '2025-09-21T16:05:00'
+            },
+            {
+                'home_team': 'Seattle Seahawks',
+                'away_team': 'Dallas Cowboys',
+                'start_time': '2025-09-21T16:25:00'
+            },
+            {
+                'home_team': 'Kansas City Chiefs',
+                'away_team': 'Atlanta Falcons',
+                'start_time': '2025-09-21T20:20:00'
+            },
+            {
+                'home_team': 'Detroit Lions',
+                'away_team': 'Arizona Cardinals',
+                'start_time': '2025-09-22T19:00:00'
+            }
+        ]
+        
+        for match_data in week3_matches:
+            home_team = teams[match_data['home_team']]
+            away_team = teams[match_data['away_team']]
+            
+            match = Match(
+                week=3,
+                home_team_id=home_team.id,
+                away_team_id=away_team.id,
+                start_time=datetime.fromisoformat(match_data['start_time']),
+                is_completed=False
+            )
+            db.session.add(match)
+        
+        # Add matches for week 4 (upcoming)
+        week4_matches = [
+            {
+                'home_team': 'Atlanta Falcons',
+                'away_team': 'New Orleans Saints',
+                'start_time': '2025-09-28T13:00:00'
+            },
+            {
+                'home_team': 'Carolina Panthers',
+                'away_team': 'Cincinnati Bengals',
+                'start_time': '2025-09-28T13:00:00'
+            },
+            {
+                'home_team': 'Indianapolis Colts',
+                'away_team': 'Pittsburgh Steelers',
+                'start_time': '2025-09-28T13:00:00'
+            },
+            {
+                'home_team': 'Jacksonville Jaguars',
+                'away_team': 'Houston Texans',
+                'start_time': '2025-09-28T13:00:00'
+            },
+            {
+                'home_team': 'Los Angeles Rams',
+                'away_team': 'Chicago Bears',
+                'start_time': '2025-09-28T13:00:00'
+            },
+            {
+                'home_team': 'Minnesota Vikings',
+                'away_team': 'Green Bay Packers',
+                'start_time': '2025-09-28T13:00:00'
+            },
+            {
+                'home_team': 'New York Giants',
+                'away_team': 'Dallas Cowboys',
+                'start_time': '2025-09-28T13:00:00'
+            },
+            {
+                'home_team': 'New York Jets',
+                'away_team': 'Denver Broncos',
+                'start_time': '2025-09-28T13:00:00'
+            },
+            {
+                'home_team': 'Tampa Bay Buccaneers',
+                'away_team': 'Philadelphia Eagles',
+                'start_time': '2025-09-28T13:00:00'
+            },
+            {
+                'home_team': 'Tennessee Titans',
+                'away_team': 'Miami Dolphins',
+                'start_time': '2025-09-28T13:00:00'
+            },
+            {
+                'home_team': 'Washington Commanders',
+                'away_team': 'Arizona Cardinals',
+                'start_time': '2025-09-28T16:05:00'
+            },
+            {
+                'home_team': 'Los Angeles Chargers',
+                'away_team': 'Kansas City Chiefs',
+                'start_time': '2025-09-28T16:25:00'
+            },
+            {
+                'home_team': 'Buffalo Bills',
+                'away_team': 'Baltimore Ravens',
+                'start_time': '2025-09-28T20:20:00'
+            },
+            {
+                'home_team': 'Detroit Lions',
+                'away_team': 'Seattle Seahawks',
+                'start_time': '2025-09-29T19:00:00'
+            }
+        ]
+        
+        for match_data in week4_matches:
+            home_team = teams[match_data['home_team']]
+            away_team = teams[match_data['away_team']]
+            
+            match = Match(
+                week=4,
+                home_team_id=home_team.id,
+                away_team_id=away_team.id,
+                start_time=datetime.fromisoformat(match_data['start_time']),
+                is_completed=False
+            )
+            db.session.add(match)
+        
+        db.session.commit()
+        
+        # Add picks for week 1
+        users = {user.username: user for user in User.query.all()}
+        week1_matches = Match.query.filter_by(week=1).all()
+        
+        # Manuel picked Atlanta Falcons over Tampa Bay Buccaneers (wrong)
+        manuel = users['Manuel']
+        falcons_match = next(m for m in week1_matches if m.home_team.name == 'Tampa Bay Buccaneers' and m.away_team.name == 'Atlanta Falcons')
+        atlanta_team = Team.query.filter_by(name='Atlanta Falcons').first()
+        pick = Pick(user_id=manuel.id, match_id=falcons_match.id, chosen_team_id=atlanta_team.id)
+        db.session.add(pick)
+        
+        # Daniel picked Denver Broncos over Tennessee Titans (correct)
+        daniel = users['Daniel']
+        broncos_match = next(m for m in week1_matches if m.home_team.name == 'Tennessee Titans' and m.away_team.name == 'Denver Broncos')
+        broncos_team = Team.query.filter_by(name='Denver Broncos').first()
+        pick = Pick(user_id=daniel.id, match_id=broncos_match.id, chosen_team_id=broncos_team.id)
+        db.session.add(pick)
+        
+        # Raff picked Cincinnati Bengals over Cleveland Browns (correct)
+        raff = users['Raff']
+        bengals_match = next(m for m in week1_matches if m.home_team.name == 'Cleveland Browns' and m.away_team.name == 'Cincinnati Bengals')
+        bengals_team = Team.query.filter_by(name='Cincinnati Bengals').first()
+        pick = Pick(user_id=raff.id, match_id=bengals_match.id, chosen_team_id=bengals_team.id)
+        db.session.add(pick)
+        
+        # Haunschi picked Washington Commanders over New York Giants (correct)
+        haunschi = users['Haunschi']
+        commanders_match = next(m for m in week1_matches if m.home_team.name == 'New York Giants' and m.away_team.name == 'Washington Commanders')
+        commanders_team = Team.query.filter_by(name='Washington Commanders').first()
+        pick = Pick(user_id=haunschi.id, match_id=commanders_match.id, chosen_team_id=commanders_team.id)
+        db.session.add(pick)
+        
+        # Add eliminated teams (losers from week 1)
+        # Manuel: Tampa Bay Buccaneers (since he picked Atlanta Falcons who lost to Tampa Bay)
+        buccaneers_team = Team.query.filter_by(name='Tampa Bay Buccaneers').first()
+        eliminated = EliminatedTeam(user_id=manuel.id, team_id=buccaneers_team.id)
+        db.session.add(eliminated)
+        
+        # Daniel: Tennessee Titans (since he picked Denver Broncos who beat Tennessee)
+        titans_team = Team.query.filter_by(name='Tennessee Titans').first()
+        eliminated = EliminatedTeam(user_id=daniel.id, team_id=titans_team.id)
+        db.session.add(eliminated)
+        
+        # Raff: Cleveland Browns (since he picked Cincinnati Bengals who beat Cleveland)
+        browns_team = Team.query.filter_by(name='Cleveland Browns').first()
+        eliminated = EliminatedTeam(user_id=raff.id, team_id=browns_team.id)
+        db.session.add(eliminated)
+        
+        # Haunschi: New York Giants (since he picked Washington Commanders who beat New York Giants)
+        giants_team = Team.query.filter_by(name='New York Giants').first()
+        eliminated = EliminatedTeam(user_id=haunschi.id, team_id=giants_team.id)
+        db.session.add(eliminated)
+        
+        db.session.commit()
+        
+        print("Database initialized with sample data")
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
+

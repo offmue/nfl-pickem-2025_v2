@@ -549,8 +549,11 @@ async function loadMatchesForWeek(week) {
                 // NEW RULE: Disable all matches if user already has a pick for a different match
                 const isMatchDisabled = hasWeekPick && !isThisMatchPicked;
                 
+                // NEW: Check if game has started (Backend provides this info)
+                const isGameStarted = match.is_game_started;
+                
                 // Format date and time in Vienna timezone
-                const matchDate = new Date(match.start_time);
+                const matchDate = new Date(match.start_time_vienna);
                 const dateOptions = { 
                     weekday: 'long', 
                     year: 'numeric', 
@@ -600,14 +603,15 @@ async function loadMatchesForWeek(week) {
                 const homeTeamOpposingStatus = getTeamStatusInfo(match.away_team, awayTeamUsage, awayTeamEliminated, awayTeamUsedAsLoser, true);
                 
                 // Determine if teams can be selected
-                const awayTeamDisabled = isMatchDisabled || awayTeamStatus.disabled || awayTeamOpposingStatus.disabled;
-                const homeTeamDisabled = isMatchDisabled || homeTeamStatus.disabled || homeTeamOpposingStatus.disabled;
+                const awayTeamDisabled = isMatchDisabled || awayTeamStatus.disabled || awayTeamOpposingStatus.disabled || isGameStarted;
+                const homeTeamDisabled = isMatchDisabled || homeTeamStatus.disabled || homeTeamOpposingStatus.disabled || isGameStarted;
                 
                 matchesHtml += `
-                    <div class="match-card ${isMatchDisabled ? 'match-disabled' : ''}" data-match-id="${match.id}">
+                    <div class="match-card ${isMatchDisabled ? 'match-disabled' : ''} ${isGameStarted ? 'game-started' : ''}" data-match-id="${match.id}">
                         <div class="match-header">
                             <div class="match-date">${formattedDate}</div>
                             ${isMatchDisabled ? '<div class="match-disabled-info">Du hast bereits einen Pick für diese Woche</div>' : ''}
+                            ${isGameStarted ? '<div class="game-started-info">Spiel bereits gestartet</div>' : ''}
                         </div>
                         <div class="match-teams">
                             <div class="match-team ${awayTeamStatus.class} ${selectedTeamId === match.away_team.id ? 'selected' : ''} ${awayTeamDisabled ? 'disabled' : ''}"

@@ -1,0 +1,52 @@
+/* Game Started Styles */
+.match-card.game-started {
+    opacity: 0.6;
+    background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
+    border: 2px solid #666;
+    pointer-events: none;
+}
+
+.match-card.game-started .match-team {
+    opacity: 0.7;
+    cursor: not-allowed;
+    background: #333 !important;
+}
+
+.match-card.game-started .match-team:hover {
+    background: #333 !important;
+    transform: none !important;
+}
+
+.game-started-info {
+    background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+    text-align: center;
+    margin-top: 5px;
+    box-shadow: 0 2px 8px rgba(255, 107, 107, 0.3);
+    animation: pulse-red 2s infinite;
+}
+
+@keyframes pulse-red {
+    0% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.8; transform: scale(1.02); }
+    100% { opacity: 1; transform: scale(1); }
+}
+
+/* Override other styles for game started */
+.match-card.game-started .match-team.disabled {
+    background: #333 !important;
+    border-color: #555 !important;
+}
+
+.match-card.game-started .match-team-logo {
+    filter: grayscale(50%);
+}
+
+.match-card.game-started .match-team-name {
+    color: #999 !important;
+}
+

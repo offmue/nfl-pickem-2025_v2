@@ -153,7 +153,8 @@ def init_database():
             pick = Pick(
                 user_id=manuel.id,
                 match_id=week1_match.id,
-                chosen_team_id=week1_match.home_team_id  # Atlanta Falcons (home team)
+                chosen_team_id=week1_match.home_team_id,  # Atlanta Falcons (home team)
+                is_correct=False  # Atlanta lost
             )
             db.session.add(pick)
             
