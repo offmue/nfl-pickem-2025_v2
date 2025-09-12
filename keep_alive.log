@@ -1,0 +1,153 @@
+2025-09-10 23:55:09,402 - INFO - 🚀 NFL PickEm Keep-Alive System started
+2025-09-10 23:55:09,402 - INFO - 📡 Pinging every 300 seconds (5 minutes)
+2025-09-10 23:55:09,402 - INFO - 🔄 Ping #1 at 2025-09-10 23:55:09
+2025-09-10 23:55:09,409 - INFO - ✅ Local ping successful - Server is alive (Status: 200)
+2025-09-10 23:55:09,410 - INFO - ✅ Keep-alive ping #1 successful
+2025-09-11 00:00:09,410 - INFO - 🔄 Ping #2 at 2025-09-11 00:00:09
+2025-09-11 00:00:09,415 - INFO - ✅ Local ping successful - Server is alive (Status: 200)
+2025-09-11 00:00:09,415 - INFO - ✅ Keep-alive ping #2 successful
+2025-09-11 00:05:09,415 - INFO - 🔄 Ping #3 at 2025-09-11 00:05:09
+2025-09-11 00:05:09,419 - INFO - ✅ Local ping successful - Server is alive (Status: 200)
+2025-09-11 00:05:09,420 - INFO - ✅ Keep-alive ping #3 successful
+2025-09-11 00:10:09,348 - INFO - 🔄 Ping #4 at 2025-09-11 00:10:09
+2025-09-11 00:10:09,353 - INFO - ✅ Local ping successful - Server is alive (Status: 200)
+2025-09-11 00:10:09,353 - INFO - ✅ Keep-alive ping #4 successful
+2025-09-11 00:15:09,353 - INFO - 🔄 Ping #5 at 2025-09-11 00:15:09
+2025-09-11 00:15:09,358 - INFO - ✅ Local ping successful - Server is alive (Status: 200)
+2025-09-11 00:15:09,358 - INFO - ✅ Keep-alive ping #5 successful
+2025-09-11 00:20:09,358 - INFO - 🔄 Ping #6 at 2025-09-11 00:20:09
+2025-09-11 00:20:09,362 - INFO - ✅ Local ping successful - Server is alive (Status: 200)
+2025-09-11 00:20:09,363 - INFO - ✅ Keep-alive ping #6 successful
+2025-09-11 00:25:09,363 - INFO - 🔄 Ping #7 at 2025-09-11 00:25:09
+2025-09-11 00:25:09,367 - INFO - ✅ Local ping successful - Server is alive (Status: 200)
+2025-09-11 00:25:09,367 - INFO - ✅ Keep-alive ping #7 successful
+2025-09-11 00:30:09,368 - INFO - 🔄 Ping #8 at 2025-09-11 00:30:09
+2025-09-11 00:30:09,372 - INFO - ✅ Local ping successful - Server is alive (Status: 200)
+2025-09-11 00:30:09,372 - INFO - ✅ Keep-alive ping #8 successful
+2025-09-11 00:35:09,372 - INFO - 🔄 Ping #9 at 2025-09-11 00:35:09
+2025-09-11 00:35:09,376 - INFO - ✅ Local ping successful - Server is alive (Status: 200)
+2025-09-11 00:35:09,376 - INFO - ✅ Keep-alive ping #9 successful
+2025-09-11 00:40:09,377 - INFO - 🔄 Ping #10 at 2025-09-11 00:40:09
+2025-09-11 00:40:09,380 - INFO - ✅ Local ping successful - Server is alive (Status: 200)
+2025-09-11 00:40:09,380 - INFO - ✅ Keep-alive ping #10 successful
+2025-09-11 00:45:09,381 - INFO - 🔄 Ping #11 at 2025-09-11 00:45:09
+2025-09-11 00:45:09,384 - INFO - ✅ Local ping successful - Server is alive (Status: 200)
+2025-09-11 00:45:09,384 - INFO - ✅ Keep-alive ping #11 successful
+2025-09-11 00:50:09,384 - INFO - 🔄 Ping #12 at 2025-09-11 00:50:09
+2025-09-11 00:50:09,388 - INFO - ✅ Local ping successful - Server is alive (Status: 200)
+2025-09-11 00:50:09,388 - INFO - ✅ Keep-alive ping #12 successful
+2025-09-11 00:55:09,388 - INFO - 🔄 Ping #13 at 2025-09-11 00:55:09
+2025-09-11 00:55:09,390 - WARNING - ⚠️ Local ping failed: HTTPConnectionPool(host='localhost', port=5000): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7f36dd45da50>: Failed to establish a new connection: [Errno 111] Connection refused'))
+2025-09-11 00:55:09,470 - ERROR - ❌ Both ping attempts failed - Server may be down!
+2025-09-11 00:55:09,471 - ERROR - ❌ Keep-alive ping #13 failed
+2025-09-11 01:00:09,472 - INFO - 🔄 Ping #14 at 2025-09-11 01:00:09
+2025-09-11 01:00:09,473 - WARNING - ⚠️ Local ping failed: HTTPConnectionPool(host='localhost', port=5000): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7f36dd45e690>: Failed to establish a new connection: [Errno 111] Connection refused'))
+2025-09-11 01:00:09,533 - ERROR - ❌ Both ping attempts failed - Server may be down!
+2025-09-11 01:00:09,534 - ERROR - ❌ Keep-alive ping #14 failed
+2025-09-11 01:05:09,534 - INFO - 🔄 Ping #15 at 2025-09-11 01:05:09
+2025-09-11 01:05:09,536 - WARNING - ⚠️ Local ping failed: HTTPConnectionPool(host='localhost', port=5000): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7f36dd46c790>: Failed to establish a new connection: [Errno 111] Connection refused'))
+2025-09-11 01:05:09,595 - ERROR - ❌ Both ping attempts failed - Server may be down!
+2025-09-11 01:05:09,596 - ERROR - ❌ Keep-alive ping #15 failed
+2025-09-11 01:10:09,596 - INFO - 🔄 Ping #16 at 2025-09-11 01:10:09
+2025-09-11 01:10:09,598 - WARNING - ⚠️ Local ping failed: HTTPConnectionPool(host='localhost', port=5000): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7f36dd470110>: Failed to establish a new connection: [Errno 111] Connection refused'))
+2025-09-11 01:10:09,656 - ERROR - ❌ Both ping attempts failed - Server may be down!
+2025-09-11 01:10:09,657 - ERROR - ❌ Keep-alive ping #16 failed
+2025-09-11 01:15:09,657 - INFO - 🔄 Ping #17 at 2025-09-11 01:15:09
+2025-09-11 01:15:09,662 - WARNING - ⚠️ Local ping failed: HTTPConnectionPool(host='localhost', port=5000): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7f36dd71f650>: Failed to establish a new connection: [Errno 111] Connection refused'))
+2025-09-11 01:15:09,721 - ERROR - ❌ Both ping attempts failed - Server may be down!
+2025-09-11 01:15:09,722 - ERROR - ❌ Keep-alive ping #17 failed
+2025-09-11 01:20:09,722 - INFO - 🔄 Ping #18 at 2025-09-11 01:20:09
+2025-09-11 01:20:09,723 - WARNING - ⚠️ Local ping failed: HTTPConnectionPool(host='localhost', port=5000): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7f36dd46d910>: Failed to establish a new connection: [Errno 111] Connection refused'))
+2025-09-11 01:20:09,781 - ERROR - ❌ Both ping attempts failed - Server may be down!
+2025-09-11 01:20:09,782 - ERROR - ❌ Keep-alive ping #18 failed
+2025-09-11 01:25:09,782 - INFO - 🔄 Ping #19 at 2025-09-11 01:25:09
+2025-09-11 01:25:09,783 - WARNING - ⚠️ Local ping failed: HTTPConnectionPool(host='localhost', port=5000): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7f36dd45e0d0>: Failed to establish a new connection: [Errno 111] Connection refused'))
+2025-09-11 01:25:09,840 - ERROR - ❌ Both ping attempts failed - Server may be down!
+2025-09-11 01:25:09,840 - ERROR - ❌ Keep-alive ping #19 failed
+2025-09-11 01:30:09,840 - INFO - 🔄 Ping #20 at 2025-09-11 01:30:09
+2025-09-11 01:30:09,842 - WARNING - ⚠️ Local ping failed: HTTPConnectionPool(host='localhost', port=5000): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7f36dd473a90>: Failed to establish a new connection: [Errno 111] Connection refused'))
+2025-09-11 01:30:09,903 - ERROR - ❌ Both ping attempts failed - Server may be down!
+2025-09-11 01:30:09,905 - ERROR - ❌ Keep-alive ping #20 failed
+2025-09-11 01:38:27,074 - INFO - 🔄 Ping #21 at 2025-09-11 01:38:25
+2025-09-11 01:38:27,410 - WARNING - ⚠️ Local ping failed: HTTPConnectionPool(host='localhost', port=5000): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7f36dd470090>: Failed to establish a new connection: [Errno 111] Connection refused'))
+2025-09-11 01:38:27,484 - ERROR - ❌ Both ping attempts failed - Server may be down!
+2025-09-11 01:38:27,484 - ERROR - ❌ Keep-alive ping #21 failed
+2025-09-11 01:43:27,190 - INFO - 🔄 Ping #22 at 2025-09-11 01:43:27
+2025-09-11 01:43:27,191 - WARNING - ⚠️ Local ping failed: HTTPConnectionPool(host='localhost', port=5000): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7f36dd470c90>: Failed to establish a new connection: [Errno 111] Connection refused'))
+2025-09-11 01:43:27,249 - ERROR - ❌ Both ping attempts failed - Server may be down!
+2025-09-11 01:43:27,249 - ERROR - ❌ Keep-alive ping #22 failed
+2025-09-11 01:48:27,250 - INFO - 🔄 Ping #23 at 2025-09-11 01:48:27
+2025-09-11 01:48:27,251 - WARNING - ⚠️ Local ping failed: HTTPConnectionPool(host='localhost', port=5000): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7f36dd45e090>: Failed to establish a new connection: [Errno 111] Connection refused'))
+2025-09-11 01:48:27,309 - ERROR - ❌ Both ping attempts failed - Server may be down!
+2025-09-11 01:48:27,310 - ERROR - ❌ Keep-alive ping #23 failed
+2025-09-11 01:53:27,310 - INFO - 🔄 Ping #24 at 2025-09-11 01:53:27
+2025-09-11 01:53:27,311 - WARNING - ⚠️ Local ping failed: HTTPConnectionPool(host='localhost', port=5000): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7f36dd46d810>: Failed to establish a new connection: [Errno 111] Connection refused'))
+2025-09-11 01:53:27,373 - ERROR - ❌ Both ping attempts failed - Server may be down!
+2025-09-11 01:53:27,374 - ERROR - ❌ Keep-alive ping #24 failed
+2025-09-11 01:58:27,375 - INFO - 🔄 Ping #25 at 2025-09-11 01:58:27
+2025-09-11 01:58:27,376 - WARNING - ⚠️ Local ping failed: HTTPConnectionPool(host='localhost', port=5000): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7f36dd46c410>: Failed to establish a new connection: [Errno 111] Connection refused'))
+2025-09-11 01:58:27,436 - ERROR - ❌ Both ping attempts failed - Server may be down!
+2025-09-11 01:58:27,436 - ERROR - ❌ Keep-alive ping #25 failed
+2025-09-11 02:03:27,436 - INFO - 🔄 Ping #26 at 2025-09-11 02:03:27
+2025-09-11 02:03:27,438 - WARNING - ⚠️ Local ping failed: HTTPConnectionPool(host='localhost', port=5000): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7f36dd46c290>: Failed to establish a new connection: [Errno 111] Connection refused'))
+2025-09-11 02:03:27,496 - ERROR - ❌ Both ping attempts failed - Server may be down!
+2025-09-11 02:03:27,496 - ERROR - ❌ Keep-alive ping #26 failed
+2025-09-12 01:23:59,669 - INFO - 🔄 Ping #27 at 2025-09-12 01:23:58
+2025-09-12 01:24:00,088 - WARNING - ⚠️ Local ping failed: HTTPConnectionPool(host='localhost', port=5000): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7f36dd45d810>: Failed to establish a new connection: [Errno 111] Connection refused'))
+2025-09-12 01:24:00,740 - ERROR - ❌ Both ping attempts failed - Server may be down!
+2025-09-12 01:24:00,740 - ERROR - ❌ Keep-alive ping #27 failed
+2025-09-12 01:29:00,741 - INFO - 🔄 Ping #28 at 2025-09-12 01:29:00
+2025-09-12 01:29:00,745 - INFO - ✅ Local ping successful - Server is alive (Status: 200)
+2025-09-12 01:29:00,745 - INFO - ✅ Keep-alive ping #28 successful
+2025-09-12 01:34:00,745 - INFO - 🔄 Ping #29 at 2025-09-12 01:34:00
+2025-09-12 01:34:00,749 - INFO - ✅ Local ping successful - Server is alive (Status: 200)
+2025-09-12 01:34:00,749 - INFO - ✅ Keep-alive ping #29 successful
+2025-09-12 01:39:00,749 - INFO - 🔄 Ping #30 at 2025-09-12 01:39:00
+2025-09-12 01:39:00,754 - INFO - ✅ Local ping successful - Server is alive (Status: 200)
+2025-09-12 01:39:00,755 - INFO - ✅ Keep-alive ping #30 successful
+2025-09-12 02:02:50,692 - INFO - 🔄 Ping #31 at 2025-09-12 02:02:49
+2025-09-12 02:02:51,291 - INFO - ✅ Local ping successful - Server is alive (Status: 200)
+2025-09-12 02:02:51,291 - INFO - ✅ Keep-alive ping #31 successful
+2025-09-12 02:07:51,292 - INFO - 🔄 Ping #32 at 2025-09-12 02:07:51
+2025-09-12 02:07:51,296 - INFO - ✅ Local ping successful - Server is alive (Status: 200)
+2025-09-12 02:07:51,296 - INFO - ✅ Keep-alive ping #32 successful
+2025-09-12 02:12:51,296 - INFO - 🔄 Ping #33 at 2025-09-12 02:12:51
+2025-09-12 02:12:51,301 - INFO - ✅ Local ping successful - Server is alive (Status: 200)
+2025-09-12 02:12:51,301 - INFO - ✅ Keep-alive ping #33 successful
+2025-09-12 15:29:50,596 - INFO - 🔄 Ping #34 at 2025-09-12 15:29:49
+2025-09-12 15:29:51,101 - INFO - ✅ Local ping successful - Server is alive (Status: 200)
+2025-09-12 15:29:51,101 - INFO - ✅ Keep-alive ping #34 successful
+2025-09-12 15:34:51,102 - INFO - 🔄 Ping #35 at 2025-09-12 15:34:51
+2025-09-12 15:34:51,103 - WARNING - ⚠️ Local ping failed: HTTPConnectionPool(host='localhost', port=5000): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7f36dd470b10>: Failed to establish a new connection: [Errno 111] Connection refused'))
+2025-09-12 15:34:51,181 - ERROR - ❌ Both ping attempts failed - Server may be down!
+2025-09-12 15:34:51,183 - ERROR - ❌ Keep-alive ping #35 failed
+2025-09-12 15:39:51,184 - INFO - 🔄 Ping #36 at 2025-09-12 15:39:51
+2025-09-12 15:39:51,188 - INFO - ✅ Local ping successful - Server is alive (Status: 200)
+2025-09-12 15:39:51,188 - INFO - ✅ Keep-alive ping #36 successful
+2025-09-12 15:44:51,189 - INFO - 🔄 Ping #37 at 2025-09-12 15:44:51
+2025-09-12 15:44:51,193 - INFO - ✅ Local ping successful - Server is alive (Status: 200)
+2025-09-12 15:44:51,193 - INFO - ✅ Keep-alive ping #37 successful
+2025-09-12 15:49:51,194 - INFO - 🔄 Ping #38 at 2025-09-12 15:49:51
+2025-09-12 15:49:51,197 - INFO - ✅ Local ping successful - Server is alive (Status: 200)
+2025-09-12 15:49:51,198 - INFO - ✅ Keep-alive ping #38 successful
+2025-09-12 15:54:51,198 - INFO - 🔄 Ping #39 at 2025-09-12 15:54:51
+2025-09-12 15:54:51,202 - INFO - ✅ Local ping successful - Server is alive (Status: 200)
+2025-09-12 15:54:51,202 - INFO - ✅ Keep-alive ping #39 successful
+2025-09-12 15:59:51,202 - INFO - 🔄 Ping #40 at 2025-09-12 15:59:51
+2025-09-12 15:59:51,206 - INFO - ✅ Local ping successful - Server is alive (Status: 200)
+2025-09-12 15:59:51,206 - INFO - ✅ Keep-alive ping #40 successful
+2025-09-12 16:04:51,206 - INFO - 🔄 Ping #41 at 2025-09-12 16:04:51
+2025-09-12 16:04:51,210 - INFO - ✅ Local ping successful - Server is alive (Status: 200)
+2025-09-12 16:04:51,210 - INFO - ✅ Keep-alive ping #41 successful
+2025-09-12 16:09:51,211 - INFO - 🔄 Ping #42 at 2025-09-12 16:09:51
+2025-09-12 16:09:51,215 - INFO - ✅ Local ping successful - Server is alive (Status: 200)
+2025-09-12 16:09:51,215 - INFO - ✅ Keep-alive ping #42 successful
+2025-09-12 16:14:51,215 - INFO - 🔄 Ping #43 at 2025-09-12 16:14:51
+2025-09-12 16:14:51,219 - INFO - ✅ Local ping successful - Server is alive (Status: 200)
+2025-09-12 16:14:51,219 - INFO - ✅ Keep-alive ping #43 successful
+2025-09-12 16:23:22,709 - INFO - 🔄 Ping #44 at 2025-09-12 16:23:21
+2025-09-12 16:23:23,742 - INFO - ✅ Local ping successful - Server is alive (Status: 200)
+2025-09-12 16:23:23,742 - INFO - ✅ Keep-alive ping #44 successful
+2025-09-12 16:28:23,393 - INFO - 🔄 Ping #45 at 2025-09-12 16:28:23
+2025-09-12 16:28:23,396 - INFO - ✅ Local ping successful - Server is alive (Status: 200)
+2025-09-12 16:28:23,396 - INFO - ✅ Keep-alive ping #45 successful

@@ -1,0 +1,18 @@
+[Unit]
+Description=NFL PickEm App
+After=network.target
+
+[Service]
+User=www-data
+WorkingDirectory=/var/www/nfl-pickem
+ExecStart=/usr/bin/python3 app_launcher.py
+Restart=always
+RestartSec=10
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=nfl-pickem
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=multi-user.target
+

@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NFL PickEm - Fantasy Football Challenge</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <i class="fas fa-football-ball"></i> NFL PickEm
+        </div>
+        <nav>
+            <ul>
+                <li><a href="#" id="dashboard-link" class="active"><i class="fas fa-home"></i> Dashboard</a></li>
+                <li><a href="#" id="picks-link"><i class="fas fa-check"></i> Picks</a></li>
+                <li><a href="#" id="leaderboard-link"><i class="fas fa-trophy"></i> Leaderboard</a></li>
+                <li><a href="#" id="all-picks-link"><i class="fas fa-list"></i> Alle Picks</a></li>
+            </ul>
+        </nav>
+        <div class="user-info">
+            <button id="login-button" class="btn btn-primary">Login</button>
+            <div id="user-details" style="display: none;">
+                <span id="username"></span>
+                <button id="logout-button" class="btn btn-secondary">Logout</button>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <!-- Dashboard Section -->
+        <section id="dashboard-section" class="section">
+            <h1>Dashboard</h1>
+            <p>Willkommen zu deiner NFL PickEm Challenge!</p>
+            
+            <div class="stats-container">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <div class="stat-value" id="user-score">0</div>
+                    <div class="stat-label">Deine Punkte</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-calendar"></i>
+                    </div>
+                    <div class="stat-value" id="current-week">0</div>
+                    <div class="stat-label">Aktuelle Woche</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-trophy"></i>
+                    </div>
+                    <div class="stat-value" id="user-rank">-</div>
+                    <div class="stat-label">Dein Rang</div>
+                </div>
+            </div>
+            
+            <div class="dashboard-cards">
+                <div class="dashboard-card">
+                    <h2>Punkte Gegner</h2>
+                    <div id="opponent-scores">Lade Punkte...</div>
+                </div>
+                
+                <div class="dashboard-card">
+                    <h2>Letzte Picks</h2>
+                    <div id="recent-picks">Noch keine Picks gemacht</div>
+                </div>
+                
+                <div class="dashboard-card">
+                    <h2>Eliminierte Teams</h2>
+                    <div id="eliminated-teams">Lade Teams...</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Picks Section -->
+        <section id="picks-section" class="section" style="display: none;">
+            <h1>Deine Picks</h1>
+            
+            <div class="week-selector">
+                <label for="week-select">Woche:</label>
+                <select id="week-select"></select>
+            </div>
+            
+            <div id="matches-container">Lade Matches...</div>
+        </section>
+
+        <!-- Leaderboard Section -->
+        <section id="leaderboard-section" class="section" style="display: none;">
+            <h1>Leaderboard</h1>
+            <p>Aktuelle Rangliste aller Spieler</p>
+            
+            <div id="leaderboard-container">Lade Leaderboard...</div>
+        </section>
+
+        <!-- All Picks Section -->
+        <section id="all-picks-section" class="section" style="display: none;">
+            <h1>Alle Picks</h1>
+            <p>Übersicht aller Picks von allen Spielern</p>
+            
+            <div class="privacy-controls">
+                <label class="privacy-toggle">
+                    <input type="checkbox" id="hide-current-picks" checked>
+                    <span class="toggle-text">Aktuelle Woche Picks verstecken (bis Woche abgeschlossen)</span>
+                </label>
+            </div>
+            
+            <div id="all-picks-container">Lade Picks...</div>
+        </section>
+    </main>
+
+    <!-- Login Modal -->
+    <div id="login-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Login</h2>
+            <div class="form-group">
+                <label for="username-input">Benutzername</label>
+                <input type="text" id="username-input" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="password-input">Passwort</label>
+                <input type="password" id="password-input" class="form-control">
+            </div>
+            <button id="login-submit" class="btn btn-primary">Login</button>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
+
+    <!-- Loading Spinner -->
+    <div id="loading-spinner" class="loading-spinner" style="display: none;">
+        <div class="spinner"></div>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
+

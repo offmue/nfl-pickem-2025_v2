@@ -1,0 +1,18 @@
+2025-09-10 11:31:52,566 - INFO - 🧪 Testing ESPN connection...
+2025-09-10 11:31:52,992 - INFO - Found 16 completed games for Week 1
+2025-09-10 11:31:52,993 - INFO - ✅ ESPN connection successful! Found 16 games
+2025-09-10 11:32:00,427 - INFO - 🧪 Testing ESPN connection...
+2025-09-10 11:32:00,535 - INFO - Found 16 completed games for Week 1
+2025-09-10 11:32:00,535 - INFO - ✅ ESPN connection successful! Found 16 games
+2025-09-10 11:32:00,536 - INFO - 🚀 Starting NFL PickEm Auto-Scorer...
+2025-09-10 11:32:00,536 - INFO - 📅 Current week: 2
+2025-09-10 11:32:00,536 - INFO - ⏰ Scheduled to run every Tuesday at 10:00 AM
+2025-09-10 11:32:00,536 - INFO - ✅ Auto-Scorer started successfully!
+2025-09-10 11:32:00,536 - INFO - Auto-Scorer is running. Press Ctrl+C to stop.
+2025-09-10 23:53:40,638 - INFO - === WEEKLY AUTO-SCORER JOB STARTED ===
+2025-09-10 23:53:40,642 - INFO - Starting safe update for Week 2
+2025-09-10 23:53:41,539 - INFO - Found 0 completed games for Week 2
+2025-09-10 23:53:41,540 - WARNING - No ESPN results found for Week 2
+2025-09-10 23:53:41,540 - INFO - ⏳ Week 2 not ready for update
+2025-09-10 23:53:41,540 - INFO - === WEEKLY AUTO-SCORER JOB COMPLETED ===
+
