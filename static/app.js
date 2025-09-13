@@ -588,7 +588,8 @@ async function loadMatchesForWeek(week) {
                     if (isOpposingTeam && teamUsedAsLoser) {
                         return { class: 'used-as-loser', title: 'Dieses Team wurde bereits als Verlierer getippt und kann nicht mehr als Verlierer gewählt werden', disabled: true };
                     }
-                    if (teamUsage && teamUsage.usage_count === 1) {
+                    // FIXED: Only show usage count for completed games
+                    if (match.is_completed && teamUsage && teamUsage.usage_count === 1) {
                         return { class: 'used-once', title: 'Dieses Team wurde bereits 1x als Gewinner gewählt', disabled: false };
                     }
                     return { class: '', title: '', disabled: false };

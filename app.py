@@ -433,6 +433,13 @@ def handle_picks():
                     old_loser_usage = TeamLoserUsage.query.filter_by(user_id=user_id, team_id=old_opposing_team_id, match_id=match_id).first()
                     if old_loser_usage:
                         db.session.delete(old_loser_usage)
+                        
+                        # Remove old elimination (if it was only from this loser usage)
+                        remaining_loser_usage = TeamLoserUsage.query.filter_by(user_id=user_id, team_id=old_opposing_team_id).count()
+                        if remaining_loser_usage == 0:  # No other loser usages
+                            old_elimination = EliminatedTeam.query.filter_by(user_id=user_id, team_id=old_opposing_team_id).first()
+                            if old_elimination:
+                                db.session.delete(old_elimination)
                     
                     # Add new winner usage
                     new_team_usage = TeamWinnerUsage.query.filter_by(user_id=user_id, team_id=chosen_team_id).first()
@@ -451,6 +458,19 @@ def handle_picks():
                         match_id=match_id
                     )
                     db.session.add(new_loser_usage)
+                    
+                    # ELIMINATE NEW OPPOSING TEAM: New opposing team is eliminated (1x as loser)
+                    existing_new_elimination = EliminatedTeam.query.filter_by(user_id=user_id, team_id=new_opposing_team_id).first()
+                    if not existing_new_elimination:
+                        new_elimination = EliminatedTeam(user_id=user_id, team_id=new_opposing_team_id)
+                        db.session.add(new_elimination)
+                    
+                    # Check if new chosen team should be eliminated (2x as winner)
+                    if new_team_usage and new_team_usage.usage_count >= 2:
+                        existing_chosen_elimination = EliminatedTeam.query.filter_by(user_id=user_id, team_id=chosen_team_id).first()
+                        if not existing_chosen_elimination:
+                            chosen_elimination = EliminatedTeam(user_id=user_id, team_id=chosen_team_id)
+                            db.session.add(chosen_elimination)
                 
                 # Update existing pick
                 existing_pick.chosen_team_id = chosen_team_id
@@ -480,6 +500,19 @@ def handle_picks():
                     match_id=match_id
                 )
                 db.session.add(loser_usage)
+                
+                # ELIMINATE TEAM: Opposing team is eliminated (1x as loser)
+                existing_elimination = EliminatedTeam.query.filter_by(user_id=user_id, team_id=opposing_team_id).first()
+                if not existing_elimination:
+                    elimination = EliminatedTeam(user_id=user_id, team_id=opposing_team_id)
+                    db.session.add(elimination)
+                
+                # Check if chosen team should be eliminated (2x as winner)
+                if team_usage and team_usage.usage_count >= 2:
+                    existing_chosen_elimination = EliminatedTeam.query.filter_by(user_id=user_id, team_id=chosen_team_id).first()
+                    if not existing_chosen_elimination:
+                        chosen_elimination = EliminatedTeam(user_id=user_id, team_id=chosen_team_id)
+                        db.session.add(chosen_elimination)
                 
                 db.session.commit()
                 return jsonify({

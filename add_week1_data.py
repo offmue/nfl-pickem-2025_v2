@@ -3,7 +3,7 @@
 Skript zum Hinzufügen der Woche 1 Daten und Ergebnisse
 """
 
-from app import app, db, User, Team, Match, Pick
+from app import app, db, User, Team, Match, Pick, EliminatedTeam, TeamLoserUsage
 from datetime import datetime
 import pytz
 
@@ -124,6 +124,34 @@ def add_week1_data():
         db.session.add(pick4)
         
         # Commit alles
+        db.session.commit()
+        
+        # Erstelle TeamLoserUsage und EliminatedTeam Einträge
+        print("✅ Erstelle Verlierer-Verwendungen und Eliminierungen...")
+        
+        # Manuel: Falcons gewählt, Buccaneers verloren → Buccaneers eliminiert
+        manuel_loser = TeamLoserUsage(user_id=manuel.id, team_id=buccaneers.id, week=1, match_id=match1.id)
+        db.session.add(manuel_loser)
+        manuel_elim = EliminatedTeam(user_id=manuel.id, team_id=buccaneers.id)
+        db.session.add(manuel_elim)
+        
+        # Daniel: Broncos gewählt, Titans verloren → Titans eliminiert  
+        daniel_loser = TeamLoserUsage(user_id=daniel.id, team_id=titans.id, week=1, match_id=match2.id)
+        db.session.add(daniel_loser)
+        daniel_elim = EliminatedTeam(user_id=daniel.id, team_id=titans.id)
+        db.session.add(daniel_elim)
+        
+        # Raff: Bengals gewählt, Browns verloren → Browns eliminiert
+        raff_loser = TeamLoserUsage(user_id=raff.id, team_id=browns.id, week=1, match_id=match3.id)
+        db.session.add(raff_loser)
+        raff_elim = EliminatedTeam(user_id=raff.id, team_id=browns.id)
+        db.session.add(raff_elim)
+        
+        # Haunschi: Commanders gewählt, Giants verloren → Giants eliminiert
+        haunschi_loser = TeamLoserUsage(user_id=haunschi.id, team_id=giants.id, week=1, match_id=match4.id)
+        db.session.add(haunschi_loser)
+        haunschi_elim = EliminatedTeam(user_id=haunschi.id, team_id=giants.id)
+        db.session.add(haunschi_elim)
         db.session.commit()
         
         print("✅ Woche 1 Spiele erstellt:")
