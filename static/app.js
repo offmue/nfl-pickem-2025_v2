@@ -528,7 +528,7 @@ async function loadMatchesForWeek(week) {
                 matchesHtml += `
                     <div class="week-pick-info">
                         <h3>Dein Pick für Woche ${week}</h3>
-                        <p>Du hast bereits einen Pick für diese Woche gemacht. Du kannst ihn ändern, aber nur ein Pick pro Woche ist erlaubt.</p>
+                        <p>Du kannst deinen Pick zwischen allen noch nicht gestarteten Spielen wechseln.</p>
                     </div>
                 `;
             } else {
@@ -546,8 +546,8 @@ async function loadMatchesForWeek(week) {
                 const selectedTeamId = userPick ? userPick.chosen_team.id : null;
                 const isThisMatchPicked = selectedTeamId !== null;
                 
-                // NEW RULE: Disable all matches if user already has a pick for a different match
-                const isMatchDisabled = hasWeekPick && !isThisMatchPicked;
+                // NEW RULE: Only disable if game has started, allow pick changes between non-started games
+                const isMatchDisabled = false; // Allow pick changes between all non-started games
                 
                 // NEW: Check if game has started (Backend provides this info)
                 const isGameStarted = match.is_game_started;
@@ -610,7 +610,6 @@ async function loadMatchesForWeek(week) {
                     <div class="match-card ${isMatchDisabled ? 'match-disabled' : ''} ${isGameStarted ? 'game-started' : ''}" data-match-id="${match.id}">
                         <div class="match-header">
                             <div class="match-date">${formattedDate}</div>
-                            ${isMatchDisabled ? '<div class="match-disabled-info">Du hast bereits einen Pick für diese Woche</div>' : ''}
                             ${isGameStarted ? '<div class="game-started-info">Spiel bereits gestartet</div>' : ''}
                         </div>
                         <div class="match-teams">
@@ -622,10 +621,10 @@ async function loadMatchesForWeek(week) {
                                  ${awayTeamStatus.title || awayTeamOpposingStatus.title ? `title="${awayTeamStatus.title || awayTeamOpposingStatus.title}"` : ''}>
                                 <img src="${match.away_team.logo_url}" alt="${match.away_team.name}" class="match-team-logo team-logo-large">
                                 <div class="match-team-name">${match.away_team.name}</div>
-                                ${awayTeamUsage && awayTeamUsage.usage_count > 0 ? `<div class="usage-indicator">${awayTeamUsage.usage_count}x</div>` : ''}
                                 ${awayTeamUsedAsLoser ? '<div class="loser-indicator">L</div>' : ''}
                                 ${selectedTeamId === match.away_team.id ? '<div class="pick-indicator"><i class="fas fa-check"></i></div>' : ''}
                                 ${match.is_completed && match.winner_team && match.winner_team.id === match.away_team.id ? '<div class="winner-indicator"><i class="fas fa-trophy"></i></div>' : ''}
+                                ${match.is_completed && awayTeamUsage && awayTeamUsage.usage_count > 0 ? `<div class="usage-indicator">${awayTeamUsage.usage_count}x</div>` : ''}
                             </div>
                             
                             <div class="match-vs">
@@ -640,10 +639,10 @@ async function loadMatchesForWeek(week) {
                                  ${homeTeamStatus.title || homeTeamOpposingStatus.title ? `title="${homeTeamStatus.title || homeTeamOpposingStatus.title}"` : ''}>
                                 <img src="${match.home_team.logo_url}" alt="${match.home_team.name}" class="match-team-logo team-logo-large">
                                 <div class="match-team-name">${match.home_team.name}</div>
-                                ${homeTeamUsage && homeTeamUsage.usage_count > 0 ? `<div class="usage-indicator">${homeTeamUsage.usage_count}x</div>` : ''}
                                 ${homeTeamUsedAsLoser ? '<div class="loser-indicator">L</div>' : ''}
                                 ${selectedTeamId === match.home_team.id ? '<div class="pick-indicator"><i class="fas fa-check"></i></div>' : ''}
                                 ${match.is_completed && match.winner_team && match.winner_team.id === match.home_team.id ? '<div class="winner-indicator"><i class="fas fa-trophy"></i></div>' : ''}
+                                ${match.is_completed && homeTeamUsage && homeTeamUsage.usage_count > 0 ? `<div class="usage-indicator">${homeTeamUsage.usage_count}x</div>` : ''}
                             </div>
                         </div>
                     </div>
