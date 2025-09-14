@@ -665,41 +665,29 @@ async function loadMatchesForWeek(week) {
 
 // Add click event listeners to team boxes
 function addTeamClickListeners() {
-    // Add a small delay to ensure DOM elements are fully rendered
-    setTimeout(() => {
-        const teamBoxes = document.querySelectorAll('.match-team');
-        console.log('Adding click listeners to', teamBoxes.length, 'team boxes');
-        
-        teamBoxes.forEach(box => {
-            // Remove any existing listeners first
-            box.onclick = null;
+    const teamBoxes = document.querySelectorAll('.match-team');
+    
+    teamBoxes.forEach(box => {
+        box.addEventListener('click', function() {
+            // NEW RULE: Check if team is disabled
+            const isDisabled = this.dataset.disabled === 'true' || this.classList.contains('disabled');
             
-            box.addEventListener('click', function() {
-                console.log('Team clicked:', this.dataset.teamName);
-                
-                // NEW RULE: Check if team is disabled
-                const isDisabled = this.dataset.disabled === 'true' || this.classList.contains('disabled');
-                
-                if (isDisabled) {
-                    // Show tooltip or warning for disabled teams
-                    const title = this.getAttribute('title');
-                    if (title) {
-                        showToast('warning', title);
-                    }
-                    return;
+            if (isDisabled) {
+                // Show tooltip or warning for disabled teams
+                const title = this.getAttribute('title');
+                if (title) {
+                    showToast('warning', title);
                 }
-                
-                const matchId = this.dataset.matchId;
-                const teamId = this.dataset.teamId;
-                const teamName = this.dataset.teamName;
-                
-                console.log('Calling selectMatchWinner with:', {matchId, teamId, teamName});
-                selectMatchWinner(matchId, teamId, teamName);
-            });
+                return;
+            }
+            
+            const matchId = this.dataset.matchId;
+            const teamId = this.dataset.teamId;
+            const teamName = this.dataset.teamName;
+            
+            selectMatchWinner(matchId, teamId, teamName);
         });
-        
-        console.log('Successfully added click listeners to', teamBoxes.length, 'team boxes');
-    }, 100); // 100ms delay to ensure DOM is ready
+    });
 }
 
 // Select match winner
@@ -863,8 +851,8 @@ async function loadAllPicksData() {
         const hideCurrentPicks = document.getElementById('hide-current-picks').checked;
         const currentWeek = 2; // Current active week
         
-        // Sort weeks in ascending order (Week 1 first)
-        const weeks = Object.keys(matchesByWeek).sort((a, b) => a - b);
+        // Sort weeks in descending order
+        const weeks = Object.keys(matchesByWeek).sort((a, b) => b - a);
         
         for (const week of weeks) {
             const weekNum = parseInt(week);

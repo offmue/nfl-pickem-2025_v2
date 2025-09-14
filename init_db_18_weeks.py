@@ -33,14 +33,10 @@ def init_database():
         ]
         
         for user_data in users_data:
-            # Check if user already exists
-            existing_user = User.query.filter_by(username=user_data['username']).first()
-            if not existing_user:
-                user = User(username=user_data['username'], is_admin=user_data['is_admin'])
-                user.set_password(user_data['password'])
-                db.session.add(user)
+            user = User(username=user_data['username'], is_admin=user_data['is_admin'])
+            user.set_password(user_data['password'])
+            db.session.add(user)
         
-        db.session.commit()
         print("Added users")
         
         # Add teams

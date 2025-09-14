@@ -187,7 +187,6 @@ class EliminatedTeam(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     team_id = db.Column(db.Integer, db.ForeignKey('team.id'), nullable=False)
-    elimination_type = db.Column(db.String(20), nullable=False)  # 'winner' or 'loser'
     
     user = db.relationship('User')
     team = db.relationship('Team')
@@ -196,8 +195,7 @@ class EliminatedTeam(db.Model):
         return {
             'id': self.id,
             'user': self.user.to_dict(),
-            'team': self.team.to_dict(),
-            'elimination_type': self.elimination_type
+            'team': self.team.to_dict()
         }
 
 class TeamWinnerUsage(db.Model):
@@ -334,7 +332,6 @@ def get_current_week():
 def handle_picks():
     try:
         if request.method == 'GET':
-            # GET-Logik bleibt unverändert
             user_id = request.args.get('user_id', type=int)
             week = request.args.get('week', type=int)
             
@@ -344,6 +341,7 @@ def handle_picks():
             query = Pick.query.filter_by(user_id=user_id)
             
             if week:
+                # Join with Match to filter by week
                 picks = query.join(Match).filter(Match.week == week).all()
             else:
                 picks = query.all()
@@ -363,196 +361,167 @@ def handle_picks():
             
             if not match_id or not chosen_team_id:
                 return jsonify({'error': 'Match ID and chosen team ID required'}), 400
-            
-            # === BASIC VALIDATIONS ===
+                
+            # Check if match exists
             match = Match.query.get(match_id)
             if not match:
                 return jsonify({'error': 'Match not found'}), 404
             
+            # Check if game has already started (Backend validation)
+            if match.is_game_started:
+                return jsonify({'error': 'Game has already started. Picks are no longer allowed.'}), 400
+                
+            # Check if team exists
             team = Team.query.get(chosen_team_id)
             if not team:
                 return jsonify({'error': 'Team not found'}), 404
-            
-            # Check if team is part of the match
-            if team.id not in [match.home_team_id, match.away_team_id]:
-                return jsonify({'error': 'Team is not part of this match'}), 400
-            
-            # Check if game has started
-            if match.is_game_started:
-                return jsonify({'error': 'Game has already started. Picks are no longer allowed.'}), 400
-            
+                
             # Check if match is completed
             if match.is_completed:
                 return jsonify({'error': 'Cannot pick for completed match'}), 400
-            
-            # === DETERMINE OPPOSING TEAM ===
-            opposing_team_id = match.away_team_id if team.id == match.home_team_id else match.home_team_id
-            
-            # === ELIMINATION CHECKS ===
-            # Check if chosen team is winner-eliminated
-            winner_eliminated = EliminatedTeam.query.filter_by(
-                user_id=user_id, 
-                team_id=team.id, 
-                elimination_type='winner'
-            ).first()
-            if winner_eliminated:
-                return jsonify({'error': f'{team.name} cannot be picked as winner (already used 2x as winner)'}), 400
-            
-            # Check if opposing team is loser-eliminated
-            loser_eliminated = EliminatedTeam.query.filter_by(
-                user_id=user_id, 
-                team_id=opposing_team_id, 
-                elimination_type='loser'
-            ).first()
-            if loser_eliminated:
-                opposing_team = Team.query.get(opposing_team_id)
-                return jsonify({'error': f'{opposing_team.name} cannot be picked as loser (already used 1x as loser)'}), 400
-            
-            # === USAGE LIMIT CHECKS ===
-            # Check winner usage limit (max 2x)
-            winner_usage = TeamWinnerUsage.query.filter_by(user_id=user_id, team_id=team.id).first()
-            if winner_usage and winner_usage.usage_count >= 2:
-                return jsonify({'error': f'{team.name} has already been picked as winner 2 times this season'}), 400
-            
-            # Check loser usage limit (max 1x)
-            loser_usage = TeamLoserUsage.query.filter_by(user_id=user_id, team_id=opposing_team_id).first()
-            if loser_usage:
-                opposing_team = Team.query.get(opposing_team_id)
-                return jsonify({'error': f'{opposing_team.name} has already been picked as loser this season'}), 400
-            
-            # === HANDLE PICK (CREATE OR UPDATE) ===
+                
+            # Check if team is part of the match
+            if team.id != match.home_team_id and team.id != match.away_team_id:
+                return jsonify({'error': 'Team is not part of this match'}), 400
+                
+            # NEW RULE: Check if user already has a pick for this WEEK (only one pick per week allowed)
             existing_week_pick = Pick.query.join(Match).filter(
                 Pick.user_id == user_id,
                 Match.week == match.week
             ).first()
             
-            if existing_week_pick:
-                # UPDATE EXISTING PICK (Pick-Wechsel)
-                result = update_existing_pick(user_id, existing_week_pick, match, team.id, opposing_team_id)
-                if result.get('error'):
-                    return jsonify(result), 400
+            if existing_week_pick and existing_week_pick.match_id != match_id:
+                return jsonify({'error': f'You already have a pick for week {match.week}. Only one pick per week is allowed.'}), 400
+                
+            # Check if chosen team is eliminated for this user
+            eliminated = EliminatedTeam.query.filter_by(user_id=user_id, team_id=team.id).first()
+            if eliminated:
+                return jsonify({'error': 'Team is already eliminated for this user'}), 400
+                
+            # Check team winner usage limit (max 2 times per season)
+            team_usage = TeamWinnerUsage.query.filter_by(user_id=user_id, team_id=team.id).first()
+            if team_usage and team_usage.usage_count >= 2:
+                return jsonify({'error': 'Team has already been picked as winner 2 times this season'}), 400
+                
+            # NEW RULE: Check if the opposing team has been picked as loser before
+            opposing_team_id = match.away_team_id if team.id == match.home_team_id else match.home_team_id
+            loser_usage = TeamLoserUsage.query.filter_by(user_id=user_id, team_id=opposing_team_id).first()
+            if loser_usage:
+                opposing_team = Team.query.get(opposing_team_id)
+                return jsonify({'error': f'{opposing_team.name} has already been picked as loser this season and cannot be picked as loser again'}), 400
+            if team.id != match.home_team_id and team.id != match.away_team_id:
+                return jsonify({'error': 'Team is not part of this match'}), 400
+                
+            # Check if user already has a pick for this match (for updates)
+            existing_pick = Pick.query.filter_by(user_id=user_id, match_id=match_id).first()
+            
+            if existing_pick:
+                # Update existing pick
+                old_team_id = existing_pick.chosen_team_id
+                old_opposing_team_id = match.away_team_id if old_team_id == match.home_team_id else match.home_team_id
+                
+                # If changing pick, we need to update usage counts
+                if old_team_id != chosen_team_id:
+                    # Remove old winner usage
+                    old_team_usage = TeamWinnerUsage.query.filter_by(user_id=user_id, team_id=old_team_id).first()
+                    if old_team_usage and old_team_usage.usage_count > 0:
+                        old_team_usage.usage_count -= 1
+                        if old_team_usage.usage_count == 0:
+                            db.session.delete(old_team_usage)
                     
+                    # Remove old loser usage
+                    old_loser_usage = TeamLoserUsage.query.filter_by(user_id=user_id, team_id=old_opposing_team_id, match_id=match_id).first()
+                    if old_loser_usage:
+                        db.session.delete(old_loser_usage)
+                        
+                        # Remove old elimination (if it was only from this loser usage)
+                        remaining_loser_usage = TeamLoserUsage.query.filter_by(user_id=user_id, team_id=old_opposing_team_id).count()
+                        if remaining_loser_usage == 0:  # No other loser usages
+                            old_elimination = EliminatedTeam.query.filter_by(user_id=user_id, team_id=old_opposing_team_id).first()
+                            if old_elimination:
+                                db.session.delete(old_elimination)
+                    
+                    # Add new winner usage
+                    new_team_usage = TeamWinnerUsage.query.filter_by(user_id=user_id, team_id=chosen_team_id).first()
+                    if new_team_usage:
+                        new_team_usage.usage_count += 1
+                    else:
+                        new_team_usage = TeamWinnerUsage(user_id=user_id, team_id=chosen_team_id, usage_count=1)
+                        db.session.add(new_team_usage)
+                    
+                    # Add new loser usage (automatically when picking winner)
+                    new_opposing_team_id = match.away_team_id if chosen_team_id == match.home_team_id else match.home_team_id
+                    new_loser_usage = TeamLoserUsage(
+                        user_id=user_id, 
+                        team_id=new_opposing_team_id, 
+                        week=match.week,
+                        match_id=match_id
+                    )
+                    db.session.add(new_loser_usage)
+                    
+                    # ELIMINATE NEW OPPOSING TEAM: New opposing team is eliminated (1x as loser)
+                    existing_new_elimination = EliminatedTeam.query.filter_by(user_id=user_id, team_id=new_opposing_team_id).first()
+                    if not existing_new_elimination:
+                        new_elimination = EliminatedTeam(user_id=user_id, team_id=new_opposing_team_id)
+                        db.session.add(new_elimination)
+                    
+                    # Check if new chosen team should be eliminated (2x as winner)
+                    if new_team_usage and new_team_usage.usage_count >= 2:
+                        existing_chosen_elimination = EliminatedTeam.query.filter_by(user_id=user_id, team_id=chosen_team_id).first()
+                        if not existing_chosen_elimination:
+                            chosen_elimination = EliminatedTeam(user_id=user_id, team_id=chosen_team_id)
+                            db.session.add(chosen_elimination)
+                
+                # Update existing pick
+                existing_pick.chosen_team_id = chosen_team_id
+                db.session.commit()
                 return jsonify({
                     'message': 'Pick updated successfully',
-                    'pick': existing_week_pick.to_dict()
+                    'pick': existing_pick.to_dict()
                 }), 200
             else:
-                # CREATE NEW PICK
-                result = create_new_pick(user_id, match, team.id, opposing_team_id)
-                if result.get('error'):
-                    return jsonify(result), 400
-                    
+                # Create new pick
+                pick = Pick(user_id=user_id, match_id=match_id, chosen_team_id=chosen_team_id)
+                db.session.add(pick)
+                
+                # Update team winner usage count
+                if team_usage:
+                    team_usage.usage_count += 1
+                else:
+                    team_usage = TeamWinnerUsage(user_id=user_id, team_id=chosen_team_id, usage_count=1)
+                    db.session.add(team_usage)
+                
+                # NEW RULE: Automatically add loser usage for opposing team
+                opposing_team_id = match.away_team_id if chosen_team_id == match.home_team_id else match.home_team_id
+                loser_usage = TeamLoserUsage(
+                    user_id=user_id, 
+                    team_id=opposing_team_id, 
+                    week=match.week,
+                    match_id=match_id
+                )
+                db.session.add(loser_usage)
+                
+                # ELIMINATE TEAM: Opposing team is eliminated (1x as loser)
+                existing_elimination = EliminatedTeam.query.filter_by(user_id=user_id, team_id=opposing_team_id).first()
+                if not existing_elimination:
+                    elimination = EliminatedTeam(user_id=user_id, team_id=opposing_team_id)
+                    db.session.add(elimination)
+                
+                # Check if chosen team should be eliminated (2x as winner)
+                if team_usage and team_usage.usage_count >= 2:
+                    existing_chosen_elimination = EliminatedTeam.query.filter_by(user_id=user_id, team_id=chosen_team_id).first()
+                    if not existing_chosen_elimination:
+                        chosen_elimination = EliminatedTeam(user_id=user_id, team_id=chosen_team_id)
+                        db.session.add(chosen_elimination)
+                
+                db.session.commit()
                 return jsonify({
                     'message': 'Pick created successfully',
-                    'pick': result['pick'].to_dict()
+                    'pick': pick.to_dict()
                 }), 201
-                
     except Exception as e:
         print(f"Error in handle_picks: {e}")
         return jsonify({'error': 'Internal server error', 'details': str(e)}), 500
-
-
-def update_existing_pick(user_id, existing_pick, new_match, new_team_id, new_opposing_team_id):
-    """
-    Update existing pick - nur bei laufenden Spielen, nicht bei abgeschlossenen
-    """
-    try:
-        old_match = existing_pick.match
-        old_team_id = existing_pick.chosen_team_id
-        old_opposing_team_id = old_match.away_team_id if old_team_id == old_match.home_team_id else old_match.home_team_id
-        
-        # Wenn sich nichts ändert, nichts tun
-        if existing_pick.match_id == new_match.id and old_team_id == new_team_id:
-            return {'success': True}
-        
-        # WICHTIG: Nur bei nicht-abgeschlossenen Spielen Usage zurücksetzen
-        if not old_match.is_completed:
-            # Entferne alte Usage-Einträge (nur bei laufenden Spielen)
-            remove_temporary_usage(user_id, old_team_id, old_opposing_team_id, old_match.id)
-        
-        # Update Pick
-        existing_pick.match_id = new_match.id
-        existing_pick.chosen_team_id = new_team_id
-        
-        # Füge neue Usage-Einträge hinzu (nur bei laufenden Spielen)
-        if not new_match.is_completed:
-            add_temporary_usage(user_id, new_team_id, new_opposing_team_id, new_match)
-        
-        db.session.commit()
-        return {'success': True}
-        
-    except Exception as e:
-        db.session.rollback()
-        return {'error': f'Failed to update pick: {str(e)}'}
-
-
-def create_new_pick(user_id, match, team_id, opposing_team_id):
-    """
-    Create new pick
-    """
-    try:
-        # Create pick
-        new_pick = Pick(
-            user_id=user_id,
-            match_id=match.id,
-            chosen_team_id=team_id
-        )
-        db.session.add(new_pick)
-        
-        # Add temporary usage (nur bei laufenden Spielen)
-        if not match.is_completed:
-            add_temporary_usage(user_id, team_id, opposing_team_id, match)
-        
-        db.session.commit()
-        return {'success': True, 'pick': new_pick}
-        
-    except Exception as e:
-        db.session.rollback()
-        return {'error': f'Failed to create pick: {str(e)}'}
-
-
-def add_temporary_usage(user_id, team_id, opposing_team_id, match):
-    """
-    Füge temporäre Usage-Einträge hinzu (werden bei Spielende finalisiert)
-    """
-    # Winner usage
-    winner_usage = TeamWinnerUsage.query.filter_by(user_id=user_id, team_id=team_id).first()
-    if winner_usage:
-        winner_usage.usage_count += 1
-    else:
-        winner_usage = TeamWinnerUsage(user_id=user_id, team_id=team_id, usage_count=1)
-        db.session.add(winner_usage)
-    
-    # Loser usage
-    loser_usage = TeamLoserUsage(
-        user_id=user_id,
-        team_id=opposing_team_id,
-        week=match.week,
-        match_id=match.id
-    )
-    db.session.add(loser_usage)
-
-
-def remove_temporary_usage(user_id, team_id, opposing_team_id, match_id):
-    """
-    Entferne temporäre Usage-Einträge (bei Pick-Wechsel)
-    """
-    # Remove winner usage
-    winner_usage = TeamWinnerUsage.query.filter_by(user_id=user_id, team_id=team_id).first()
-    if winner_usage:
-        winner_usage.usage_count -= 1
-        if winner_usage.usage_count <= 0:
-            db.session.delete(winner_usage)
-    
-    # Remove loser usage
-    loser_usage = TeamLoserUsage.query.filter_by(
-        user_id=user_id, 
-        team_id=opposing_team_id, 
-        match_id=match_id
-    ).first()
-    if loser_usage:
-        db.session.delete(loser_usage)
-
 
 @app.route('/api/picks/score', methods=['GET'])
 def get_user_scores():
